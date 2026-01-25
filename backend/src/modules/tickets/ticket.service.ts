@@ -7,26 +7,9 @@ import { CreateTicketInput, TicketRow } from "./ticket.type";
 export async function addTicket(input: CreateTicketInput): Promise<TicketRow> {
   const { tier, totalQuantity } = input;
 
-  if (!tier) {
-    throw new RequestValidationError([
-      { msg: "Tier is required", type: "tier" },
-    ]);
-  }
-
-  if (totalQuantity <= 0) {
-    throw new RequestValidationError([
-      {
-        msg: "Total quantity must be greater than zero",
-        type: "totalQuantity",
-      },
-    ]);
-  }
-
-  // 2️⃣ Derive price from enum (doc-enforced)
   const price = TICKET_PRICING[tier as unknown as keyof typeof TICKET_PRICING];
 
   try {
-    // 3️⃣ Persist via repo
     return await createTicket({
       tier,
       price,
