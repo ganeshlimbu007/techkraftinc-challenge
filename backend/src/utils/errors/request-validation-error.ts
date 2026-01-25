@@ -3,7 +3,9 @@ import { CustomError } from "./custom-error";
 
 export class RequestValidationError extends Error implements CustomError {
   statusCode: number = 400;
-  constructor(public errors: ValidationError[]) {
+  constructor(
+    public errors: ValidationError[] | { msg: string; type: string }[],
+  ) {
     super("Invalid request parameters");
 
     Object.setPrototypeOf(this, RequestValidationError.prototype);
