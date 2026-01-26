@@ -30,15 +30,15 @@ export async function createReservationTx({
       `UPDATE tickets SET remaining_quantity = remaining_quantity - $1 WHERE id=$2`,
       [quantity, ticketId],
     );
-
+    const ttlMinutes = Number(process.env.RESERVATION_TTL_MINUTES || 2);
     const reservation = await client.query(
       `
-      INSERT INTO reservations
-      (ticket_id, quantity, token, status, expires_at)
-      VALUES ($1, $2, $3, 'ACTIVE', now() + interval '2 minutes')
-      RETURNING *
-      `,
-      [ticketId, quantity, token],
+  INSERT INTO reservations
+  (ticket_id, quantity, token, status, expires_at)
+  VALUES ($1, $2, $3, 'ACTIVE', now() + make_interval(mins => $4))
+  RETURNING *
+  `,
+      [ticketId, quantity, token, ttlMinutes],
     );
 
     await client.query("COMMIT");

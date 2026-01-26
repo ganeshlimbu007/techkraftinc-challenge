@@ -2,7 +2,8 @@ import cron from "node-cron";
 import fs from "fs";
 import path from "path";
 import { pool } from "../db";
-
+const cronSeconds = Number(process.env.CRON_CLEANUP_INTERVAL_SECONDS || 30);
+const cronExpression = `*/${cronSeconds} * * * * *`;
 // Load SQL once
 const cleanupSql = fs.readFileSync(
   path.join(__dirname, "../db/cleanup/expire_reservations.sql"),
@@ -10,7 +11,7 @@ const cleanupSql = fs.readFileSync(
 );
 
 // Run every 30 seconds
-cron.schedule("*/30 * * * * *", async () => {
+cron.schedule(cronExpression, async () => {
   try {
     console.log("hello running cron job");
     await pool.query(cleanupSql);
