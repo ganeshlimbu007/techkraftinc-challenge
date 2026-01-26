@@ -3,6 +3,7 @@ import { errorHandler } from "./middlewares/error-handler";
 import { NotFoundError } from "./utils/errors/not-found-error";
 import { ticketRouter } from "./modules/tickets/ticket.route";
 import { bookingRouter } from "./modules/bookings/bookings.routes";
+import "./jobs/expire-reservations.job";
 
 const app = express();
 
