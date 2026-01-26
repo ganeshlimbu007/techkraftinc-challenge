@@ -1,15 +1,22 @@
-CREATE TABLE bookings (
+CREATE TABLE tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-  ticket_id UUID NOT NULL,
-  quantity INT NOT NULL CHECK (quantity > 0),
+  tier TEXT NOT NULL
+    CHECK (tier IN ('VIP', 'FRONT_ROW', 'GA')),
 
-  status TEXT NOT NULL CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED')),
+  price INT NOT NULL
+    CHECK (price > 0),
+
+  total_quantity INT NOT NULL
+    CHECK (total_quantity > 0),
+
+  remaining_quantity INT NOT NULL
+    CHECK (remaining_quantity >= 0),
 
   created_at TIMESTAMP DEFAULT now(),
 
-  CONSTRAINT fk_ticket
-    FOREIGN KEY (ticket_id)
-    REFERENCES tickets(id)
-    ON DELETE RESTRICT
+  CONSTRAINT remaining_lte_total
+    CHECK (remaining_quantity <= total_quantity),
+
+  CONSTRAINT unique_ticket_tier UNIQUE (tier)
 );

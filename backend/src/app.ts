@@ -2,13 +2,14 @@ import express from "express";
 import { errorHandler } from "./middlewares/error-handler";
 import { NotFoundError } from "./utils/errors/not-found-error";
 import { ticketRouter } from "./modules/tickets/ticket.route";
+import { bookingRouter } from "./modules/bookings/bookings.routes";
 
 const app = express();
 
 app.use(express.json());
 
 app.use("/tickets", ticketRouter);
-
+app.use("/bookings", bookingRouter);
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });

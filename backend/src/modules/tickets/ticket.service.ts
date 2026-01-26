@@ -19,7 +19,7 @@ export async function addTicket(input: CreateTicketInput): Promise<TicketRow> {
     // 4️⃣ Translate DB errors → domain errors
     if (err.code === "23505") {
       // unique constraint violation (tier already exists)
-      throw new ConflictError();
+      throw new ConflictError(' "Ticket tier already exists"');
     }
     throw err;
   }

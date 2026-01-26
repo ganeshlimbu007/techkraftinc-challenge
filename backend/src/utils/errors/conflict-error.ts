@@ -6,14 +6,14 @@ interface ConflictErrorItem {
 
 export class ConflictError extends CustomError {
   statusCode = 409;
-  reason = "Ticket tier already exists";
-  constructor() {
+
+  constructor(public message: string) {
     super("Conflict error");
 
     Object.setPrototypeOf(this, ConflictError.prototype);
   }
 
   serializeErrors() {
-    return [{ message: this.reason }];
+    return [{ message: this.message }];
   }
 }
