@@ -3,6 +3,7 @@ import {
   BookingStatusEnum,
 } from "../../data/enums/booking-status";
 import { pool } from "../../db";
+import { BadRequestError } from "../../utils/errors/bad-request-error";
 import { BookingRow } from "./bookings.type";
 export async function createBookingTx(params: {
   ticketId: string;
@@ -26,14 +27,14 @@ export async function createBookingTx(params: {
     );
 
     if (ticketRes.rowCount === 0) {
-      throw new Error(BookingErrorCode.TICKET_NOT_FOUND);
+      throw new BadRequestError(BookingErrorCode.TICKET_NOT_FOUND);
     }
 
     const remaining = ticketRes.rows[0].remaining_quantity;
 
     // 2️⃣ Check inventory
     if (remaining < params.quantity) {
-      throw new Error(BookingErrorCode.INSUFFICIENT_INVENTORY);
+      throw new BadRequestError(BookingErrorCode.INSUFFICIENT_INVENTORY);
     }
 
     // 3️⃣ Decrement inventory

@@ -3,6 +3,7 @@ import {
   TicketStatusEnum,
 } from "../../data/enums/booking-status";
 import { pool } from "../../db";
+import { BadRequestError } from "../../utils/errors/bad-request-error";
 
 import { ReservationRow } from "./bookings.type";
 
@@ -29,7 +30,7 @@ export async function confirmPaymentTx(params: {
     );
 
     if (res.rowCount === 0) {
-      throw new Error(BookingErrorCode.RESERVATION_EXPIRED);
+      throw new BadRequestError(BookingErrorCode.RESERVATION_EXPIRED);
     }
 
     const reservation = res.rows[0];

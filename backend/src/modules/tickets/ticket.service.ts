@@ -1,6 +1,6 @@
 import { TICKET_PRICING } from "../../data/enums/ticket-tier";
 import { ConflictError } from "../../utils/errors/conflict-error";
-import { RequestValidationError } from "../../utils/errors/request-validation-error";
+
 import { createTicket, getAllTickets } from "./ticket.repo";
 import { CreateTicketInput, TicketRow } from "./ticket.type";
 

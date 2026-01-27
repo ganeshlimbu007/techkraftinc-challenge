@@ -3,6 +3,8 @@ import { randomUUID } from "crypto";
 
 import { ReservationRow } from "./bookings.type";
 
+import { BadRequestError } from "../../utils/errors/bad-request-error";
+
 export async function createReservationTx(params: {
   ticketIds: string[];
 }): Promise<ReservationRow> {
@@ -25,7 +27,7 @@ export async function createReservationTx(params: {
     );
 
     if (res.rowCount !== params.ticketIds.length) {
-      throw new Error("INVALID_OR_UNAVAILABLE_TICKETS");
+      throw new BadRequestError("INVALID_OR_UNAVAILABLE_TICKETS ");
     }
 
     const ttlMinutes = Number(process.env.RESERVATION_TTL_MINUTES || 2);
