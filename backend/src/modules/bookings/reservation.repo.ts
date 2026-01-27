@@ -1,43 +1,36 @@
-import {
-  BookingErrorCode,
-  TicketStatusEnum,
-} from "../../data/enums/booking-status";
 import { pool } from "../../db";
 import { randomUUID } from "crypto";
-import { CreateTicketInput, ReservationItem } from "../tickets/ticket.type";
+
 import { ReservationRow } from "./bookings.type";
 
 export async function createReservationTx(params: {
-  items: ReservationItem[];
+  ticketIds: string[];
 }): Promise<ReservationRow> {
   const client = await pool.connect();
   const token = randomUUID();
 
   try {
     await client.query("BEGIN");
-    const allTicketIds: string[] = [];
 
-    for (const item of params.items) {
-      const res = await client.query<{ id: string }>(
-        `
-        SELECT id
-        FROM tickets
-        WHERE tier = $1
-          AND status = 'AVAILABLE'
-        LIMIT $2
-        FOR UPDATE
-        `,
-        [item.tier, item.quantity],
-      );
+    // 1️⃣ Lock selected tickets
+    const res = await client.query<{ id: string }>(
+      `
+      SELECT id
+      FROM tickets
+      WHERE id = ANY($1::uuid[])
+        AND status = 'AVAILABLE'
+      FOR UPDATE
+      `,
+      [params.ticketIds],
+    );
 
-      if ((res.rowCount ?? 0) < item.quantity) {
-        throw new Error("INSUFFICIENT_TICKETS");
-      }
-
-      allTicketIds.push(...res.rows.map((r) => r.id));
+    if (res.rowCount !== params.ticketIds.length) {
+      throw new Error("INVALID_OR_UNAVAILABLE_TICKETS");
     }
 
     const ttlMinutes = Number(process.env.RESERVATION_TTL_MINUTES || 2);
+
+    // 2️⃣ Create reservation
     const reservationRes = await client.query<ReservationRow>(
       `
       INSERT INTO reservations (token, status, expires_at)
@@ -49,22 +42,22 @@ export async function createReservationTx(params: {
 
     const reservation = reservationRes.rows[0];
 
-    // 3️⃣ Attach tickets to reservation
+    // 3️⃣ Attach tickets
     await client.query(
       `
       UPDATE tickets
-      SET status = $1,
-          reservation_id = $2
-      WHERE id = ANY($3::uuid[])
+      SET status = 'RESERVED',
+          reservation_id = $1
+      WHERE id = ANY($2::uuid[])
       `,
-      [TicketStatusEnum.RESERVED, reservation.id, allTicketIds],
+      [reservation.id, params.ticketIds],
     );
 
     await client.query("COMMIT");
     return reservation;
-  } catch (e) {
+  } catch (err) {
     await client.query("ROLLBACK");
-    throw e;
+    throw err;
   } finally {
     client.release();
   }

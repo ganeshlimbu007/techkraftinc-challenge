@@ -5,18 +5,16 @@ const router = express.Router();
 
 router.post("/bookings/reservations", async (req: Request, res: Response) => {
   try {
-    const { items } = req.body;
+    const { ticketIds } = req.body;
 
-    const reservation = await BookingService.createReservation(items);
+    const reservation = await BookingService.createReservation(ticketIds);
 
     res.status(201).json({
       reservationToken: reservation.token,
       expiresAt: reservation.expires_at,
     });
   } catch (err: any) {
-    res.status(400).json({
-      message: err.message || "Failed to create reservation",
-    });
+    res.status(400).json({ message: err.message });
   }
 });
 

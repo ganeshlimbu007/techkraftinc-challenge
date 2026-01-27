@@ -23,6 +23,5 @@ export interface CreateTicketInput {
 }
 
 export type ReservationItem = {
-  tier: TicketTierType;
-  quantity: number;
+  ticketIds: string[];
 };
