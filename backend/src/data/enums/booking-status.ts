@@ -2,6 +2,14 @@ export const BOOKING_STATUS = ["CONFIRMED", "FAILED"] as const;
 
 export type BookingStatus = (typeof BOOKING_STATUS)[number];
 
+export enum TicketStatusEnum {
+  AVAILABLE = "AVAILABLE",
+  RESERVED = "RESERVED",
+  SOLD = "SOLD",
+}
+
+export type TicketStatus = `${TicketStatusEnum}`;
+
 export enum BookingErrorCode {
   TICKET_NOT_FOUND = "TICKET_NOT_FOUND",
   INSUFFICIENT_INVENTORY = "INSUFFICIENT_INVENTORY",

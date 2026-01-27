@@ -1,9 +1,9 @@
 SELECT
-  id,
   tier,
   price,
-  total_quantity,
-  remaining_quantity,
-  created_at
+  status,
+  COUNT(*)::int AS count
 FROM tickets
+GROUP BY tier, price, status
 ORDER BY price DESC;
+

@@ -1,17 +1,21 @@
-import { BookingErrorCode } from "../../data/enums/booking-status";
+import {
+  BookingErrorCode,
+  TicketStatusEnum,
+} from "../../data/enums/booking-status";
 import { pool } from "../../db";
 
 import { ReservationRow } from "./bookings.type";
 
-export async function confirmReservationTx(
-  token: string,
-): Promise<ReservationRow> {
+export async function confirmPaymentTx(params: {
+  reservationToken: string;
+  paymentIntentId: string;
+}): Promise<ReservationRow> {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // 🔒 Lock + validate reservation in ONE step
+    // 1️⃣ Lock reservation & validate expiry (DB time)
     const res = await client.query<ReservationRow>(
       `
       SELECT *
@@ -21,17 +25,26 @@ export async function confirmReservationTx(
         AND expires_at > now()
       FOR UPDATE
       `,
-      [token],
+      [params.reservationToken],
     );
 
-    // ❌ Invalid / expired / already confirmed
     if (res.rowCount === 0) {
       throw new Error(BookingErrorCode.RESERVATION_EXPIRED);
     }
 
     const reservation = res.rows[0];
 
-    // ✅ Confirm reservation
+    // 2️⃣ Mark tickets as SOLD
+    await client.query(
+      `
+      UPDATE tickets
+      SET status = $1
+      WHERE reservation_id = $2
+      `,
+      [TicketStatusEnum.SOLD, reservation.id],
+    );
+
+    // 3️⃣ Mark reservation as CONFIRMED
     await client.query(
       `
       UPDATE reservations

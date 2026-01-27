@@ -1,48 +1,67 @@
-import { BookingErrorCode } from "../../data/enums/booking-status";
+import {
+  BookingErrorCode,
+  TicketStatusEnum,
+} from "../../data/enums/booking-status";
 import { pool } from "../../db";
 import { randomUUID } from "crypto";
+import { CreateTicketInput, ReservationItem } from "../tickets/ticket.type";
+import { ReservationRow } from "./bookings.type";
 
-export async function createReservationTx({
-  ticketId,
-  quantity,
-}: {
-  ticketId: string;
-  quantity: number;
-}) {
+export async function createReservationTx(params: {
+  items: ReservationItem[];
+}): Promise<ReservationRow> {
   const client = await pool.connect();
   const token = randomUUID();
 
   try {
     await client.query("BEGIN");
+    const allTicketIds: string[] = [];
 
-    const ticket = await client.query(
-      `SELECT remaining_quantity FROM tickets WHERE id=$1 FOR UPDATE`,
-      [ticketId],
-    );
+    for (const item of params.items) {
+      const res = await client.query<{ id: string }>(
+        `
+        SELECT id
+        FROM tickets
+        WHERE tier = $1
+          AND status = 'AVAILABLE'
+        LIMIT $2
+        FOR UPDATE
+        `,
+        [item.tier, item.quantity],
+      );
 
-    if (ticket.rowCount === 0)
-      throw new Error(BookingErrorCode.TICKET_NOT_FOUND);
+      if ((res.rowCount ?? 0) < item.quantity) {
+        throw new Error("INSUFFICIENT_TICKETS");
+      }
 
-    if (ticket.rows[0].remaining_quantity < quantity)
-      throw new Error(BookingErrorCode.INSUFFICIENT_INVENTORY);
+      allTicketIds.push(...res.rows.map((r) => r.id));
+    }
 
-    await client.query(
-      `UPDATE tickets SET remaining_quantity = remaining_quantity - $1 WHERE id=$2`,
-      [quantity, ticketId],
-    );
     const ttlMinutes = Number(process.env.RESERVATION_TTL_MINUTES || 2);
-    const reservation = await client.query(
+    const reservationRes = await client.query<ReservationRow>(
       `
-  INSERT INTO reservations
-  (ticket_id, quantity, token, status, expires_at)
-  VALUES ($1, $2, $3, 'ACTIVE', now() + make_interval(mins => $4))
-  RETURNING *
-  `,
-      [ticketId, quantity, token, ttlMinutes],
+      INSERT INTO reservations (token, status, expires_at)
+      VALUES ($1, 'ACTIVE', now() + make_interval(mins => $2))
+      RETURNING *
+      `,
+      [token, ttlMinutes],
+    );
+
+    const reservation = reservationRes.rows[0];
+
+    // 3️⃣ Attach tickets to reservation
+    await client.query(
+      `
+      UPDATE tickets
+      SET status = $1,
+          reservation_id = $2
+      WHERE id = ANY($3::uuid[])
+      `,
+      [TicketStatusEnum.RESERVED, reservation.id, allTicketIds],
     );
 
     await client.query("COMMIT");
-    return reservation.rows[0];
+    return reservation;
   } catch (e) {
     await client.query("ROLLBACK");
     throw e;

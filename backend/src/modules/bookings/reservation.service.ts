@@ -1,4 +1,4 @@
-import { createReservationTx } from "./reservation.repo";
+/* import { createReservationTx } from "./reservation.repo";
 import { confirmReservationTx } from "./payment.repo";
 import { BookingErrorCode } from "../../data/enums/booking-status";
 import { ConflictError } from "../../utils/errors/conflict-error";
@@ -40,5 +40,27 @@ export async function confirmPayment(input: {
       throw new ConflictError("Invalid reservation token");
     }
     throw err;
+  }
+}
+ */
+
+import { ReservationRow } from "./bookings.type";
+import { confirmPaymentTx } from "./payment.repo";
+
+export class PaymentService {
+  static async confirmPayment(params: {
+    reservationToken: string;
+    paymentIntentId: string;
+  }): Promise<ReservationRow> {
+    if (!params.reservationToken) {
+      throw new Error("MISSING_RESERVATION_TOKEN");
+    }
+
+    if (!params.paymentIntentId) {
+      throw new Error("MISSING_PAYMENT_INTENT");
+    }
+
+    // Delegate to repo
+    return confirmPaymentTx(params);
   }
 }

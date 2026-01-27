@@ -4,8 +4,6 @@ import { TicketPriceType, TicketRow, TicketTierType } from "./ticket.type";
 
 const createTicketSql = loadSql("create-ticket.sql");
 
-const getTicketsSql = loadSql("get-tickets.sql");
-
 export async function createTicket(params: {
   tier: TicketTierType;
   price: TicketPriceType;
@@ -23,6 +21,15 @@ export async function createTicket(params: {
 }
 
 export async function getAllTickets(): Promise<TicketRow[]> {
-  const result = await pool.query(getTicketsSql);
-  return result.rows;
+  const res = await pool.query(`
+    SELECT
+      id,
+      tier,
+      price,
+      status
+    FROM tickets
+    ORDER BY tier, price, created_at
+  `);
+
+  return res.rows;
 }

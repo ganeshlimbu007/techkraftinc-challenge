@@ -1,26 +1,23 @@
-import { Request, Response } from "express";
-import { reserveTickets, confirmPayment } from "./reservation.service";
+import express, { Request, Response } from "express";
+import { BookingService } from "./booking.service";
 
-export async function createReservation(req: Request, res: Response) {
-  const { ticketId, quantity } = req.body;
-  const reservation = await reserveTickets({ ticketId, quantity });
+const router = express.Router();
 
-  res.status(201).json({
-    reservationToken: reservation.token,
-    expiresAt: reservation.expires_at,
-  });
-}
+router.post("/bookings/reservations", async (req: Request, res: Response) => {
+  try {
+    const { items } = req.body;
 
-export async function confirmBooking(req: Request, res: Response) {
-  const { reservationToken, paymentIntentId } = req.body;
+    const reservation = await BookingService.createReservation(items);
 
-  const booking = await confirmPayment({
-    reservationToken,
-    paymentIntentId,
-  });
+    res.status(201).json({
+      reservationToken: reservation.token,
+      expiresAt: reservation.expires_at,
+    });
+  } catch (err: any) {
+    res.status(400).json({
+      message: err.message || "Failed to create reservation",
+    });
+  }
+});
 
-  res.status(200).json({
-    bookingId: booking.id,
-    status: booking.status,
-  });
-}
+export { router as bookingRouter };

@@ -9,8 +9,7 @@ export async function getTickets(req: Request, res: Response) {
       id: t.id,
       tier: t.tier,
       price: t.price,
-      totalQuantity: t.total_quantity,
-      remainingQuantity: t.remaining_quantity,
+      status: t.status,
     })),
   });
 }
@@ -27,7 +26,5 @@ export async function createTicket(req: Request, res: Response) {
     id: ticket.id,
     tier: ticket.tier,
     price: ticket.price,
-    totalQuantity: ticket.total_quantity,
-    remainingQuantity: ticket.remaining_quantity,
   });
 }
