@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "db:setup": "psql   postgresql://ticket_user:ticket_pass@localhost:5432/ticket_db -f src/db/migrations/001_create_tickets.sql",
+    "db:drop": "psql \"$DATABASE_URL\" -c \"DROP SCHEMA public CASCADE; CREATE SCHEMA public;\"",
+    "db:migrate": "psql \"$DATABASE_URL\" -f src/db/migrations/001_create_extensions.sql && psql \"$DATABASE_URL\" -f src/db/migrations/002_create_tickets.sql && psql \"$DATABASE_URL\" -f src/db/migrations/003_create_reservations.sql",
+    "db:seed": "psql \"$DATABASE_URL\" -f src/db/seed/001_seed_tickets.sql",
+    "db:setup": "npm run db:drop && npm run db:migrate && npm run db:seed",
     "start": "node dist/server.js"
   },
   "keywords": [],
