@@ -1,11 +1,13 @@
 -- Enable UUID generation
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Drop old tables (safe during refactor)
+-- Drop old tables (safe on reset)
 DROP TABLE IF EXISTS tickets CASCADE;
 DROP TABLE IF EXISTS reservations CASCADE;
 
--- Reservations table
+-- =========================
+-- RESERVATIONS
+-- =========================
 CREATE TABLE reservations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
@@ -18,7 +20,9 @@ CREATE TABLE reservations (
   created_at TIMESTAMP DEFAULT now()
 );
 
--- Tickets table (INDIVIDUAL tickets)
+-- =========================
+-- TICKETS (INDIVIDUAL)
+-- =========================
 CREATE TABLE tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
@@ -32,17 +36,17 @@ CREATE TABLE tickets (
 
   reservation_id UUID NULL,
 
-  created_at TIMESTAMP DEFAULT now()
+  created_at TIMESTAMP DEFAULT now(),
+
+  CONSTRAINT fk_ticket_reservation
+    FOREIGN KEY (reservation_id)
+    REFERENCES reservations(id)
+    ON DELETE SET NULL
 );
 
--- Foreign key after both tables exist
-ALTER TABLE tickets
-ADD CONSTRAINT fk_ticket_reservation
-FOREIGN KEY (reservation_id)
-REFERENCES reservations(id)
-ON DELETE SET NULL;
-
--- Indexes (critical for performance)
+-- =========================
+-- INDEXES
+-- =========================
 CREATE INDEX idx_tickets_status
   ON tickets(status);
 
