@@ -35,7 +35,7 @@ COMMIT;
 cron.schedule(`*/${intervalSeconds} * * * * *`, async () => {
   try {
     await pool.query(cleanupSql);
-    console.log("[CRON] expired reservations cleaned");
+ 
   } catch (err) {
     console.error("[CRON] cleanup failed", err);
   }

@@ -19,7 +19,7 @@ export function CheckoutButton({ ids }: Props) {
   const onClick = async () => {
     setReserveError("");
     setReserveLoading(true);
-    console.log("selected ids", ids);
+
     try {
       const result = await ReservationService.create([...ids]);
 

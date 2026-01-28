@@ -32,8 +32,6 @@ export default function PaymentLayout() {
     setError("");
     setLoading(true);
 
-    console.log("submitting", token);
-
     try {
       await PaymentService.confirmPayment({
         reservationToken: token ?? "",
@@ -47,10 +45,6 @@ export default function PaymentLayout() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log("hello err", error);
-  }, [error]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;

@@ -8,8 +8,6 @@ interface GetTicketsResponse {
 export async function fetchTickets(): Promise<Ticket[]> {
   const res = await api.get<GetTicketsResponse>("/tickets");
 
-  console.log("data", res);
-  // Explicit runtime safety
   if (!res.data) {
     throw new Error("Invalid tickets response");
   }
