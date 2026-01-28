@@ -73,7 +73,7 @@ export default function TicketsLayoutPage() {
             );
           })}
 
-        <CheckoutButton count={selectedIds.length} />
+        <CheckoutButton ids={selectedIds} />
       </ul>
 
       <TicketList

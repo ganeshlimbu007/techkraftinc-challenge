@@ -1,7 +1,6 @@
 "use client";
 import { Ticket } from "@/src/data/types/ticket";
 import { TicketCard } from "./ticket-card";
-import { useState } from "react";
 
 interface Props {
   tickets: Ticket[];
