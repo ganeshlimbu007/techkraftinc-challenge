@@ -38,7 +38,7 @@ export default function PaymentLayout() {
         card,
       });
 
-      router.push("/bookings/success");
+      router.push("/payment/success");
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
     } finally {
@@ -50,13 +50,12 @@ export default function PaymentLayout() {
   const seconds = secondsLeft % 60;
 
   return (
-    <main className="min-h-screen bg-zinc-50 flex flex-col gap-4 items-center justify-center p-6">
+    <>
       <div className="w-full   max-w-md bg-white rounded-xl shadow-lg border p-6 space-y-6">
         <h1 className="text-xl font-semibold text-zinc-900">
           Complete Payment
         </h1>
 
-        {/* Expiry Warning */}
         <div
           className={`rounded-lg p-3 text-sm font-medium ${
             secondsLeft <= 30
@@ -70,7 +69,6 @@ export default function PaymentLayout() {
           </span>
         </div>
 
-        {/* Fake Card Form */}
         <form onSubmit={handlePay} className="space-y-4">
           <div>
             <label className="block text-sm text-zinc-600 mb-1">
@@ -108,6 +106,6 @@ export default function PaymentLayout() {
       </div>
 
       <ErrorComponent error={error} />
-    </main>
+    </>
   );
 }
