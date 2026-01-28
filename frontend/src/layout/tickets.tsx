@@ -18,6 +18,7 @@ export default function TicketsLayoutPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const getTickets = async () => {
+    setLoading(true);
     try {
       const tickets = await TicketsService.getAllTickets();
       setTickets(tickets);
@@ -76,16 +77,24 @@ export default function TicketsLayoutPage() {
         <CheckoutButton ids={selectedIds} />
       </ul>
 
-      <TicketList
-        tickets={tickets
-          .sort((a, b) => a.id.localeCompare(b.id))
-          .filter((ticket) =>
-            selectedTab === tabs[0] ? ticket : ticket.tier === selectedTab,
-          )}
-        selectedIds={selectedIds}
-        onSelectIds={onToggle}
-      />
-      <ErrorComponent error={error} />
+      {loading ? (
+        <div className="mt-8 h-full w-full flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <>
+          <TicketList
+            tickets={tickets
+              .sort((a, b) => a.id.localeCompare(b.id))
+              .filter((ticket) =>
+                selectedTab === tabs[0] ? ticket : ticket.tier === selectedTab,
+              )}
+            selectedIds={selectedIds}
+            onSelectIds={onToggle}
+          />
+          <ErrorComponent error={error} />
+        </>
+      )}
     </div>
   );
 }
