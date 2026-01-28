@@ -2,6 +2,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PaymentService } from "../features/payment/payment.service";
+import ErrorComponent from "../components/error";
 
 const RESERVATION_TTL_SECONDS = 120; // 2 minutes
 
@@ -112,11 +113,7 @@ export default function PaymentLayout() {
         </p>
       </div>
 
-      <div
-        className={`rounded-lg p-3 capitalize text-sm font-medium ${"bg-red-50 text-red-700"} ${error.trim().length ? "" : "invisible"}`}
-      >
-        {error?.toLocaleLowerCase().replace("_", " ")}
-      </div>
+      <ErrorComponent error={error} />
     </main>
   );
 }
