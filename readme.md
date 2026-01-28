@@ -119,6 +119,7 @@ Frontend runs on:
 3.  Create reservation (tickets temporarily locked)
 4.  Complete dummy payment
 5.  Reservation confirmed or auto-expired
+6.  After allocated time (lets say 2 mins) the ticket are available and not reserved to be paid.
 
 ---
 
